@@ -27,7 +27,7 @@ jobs:
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install -y trivy
-        needs: Checkout code
+          needs: Checkout code
       # 3️⃣ Scanner le projet avec Trivy
       - name: Trivy Scan
         run: |
