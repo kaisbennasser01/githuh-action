@@ -14,9 +14,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Récupérer le code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Installer Trivy
+      - name: Installer Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      # 3️⃣ Scanner le projet avec Trivy
+      - name: Trivy Scan
+        run: |
+          trivy fs --exit-code 1 --severity HIGH,CRITICAL .
+
+      # 4️⃣ Installer GitLeaks
+      - name: Installer GitLeaks
+        run: |
+          curl -sSL https://github.com/zricethezav/gitleaks/releases/download/v8.18.2/gitleaks_8.18.2_linux_x64.tar.gz | tar -xz
+          sudo mv gitleaks /usr/local/bin/
+
+      # 5️⃣ Scanner les secrets avec GitLeaks
+      - name: GitLeaks Scan
+        run: |
+          gitleaks detect --source=. --exit-code 1
+
+      # 6️⃣ Déployer le site sur GitHub Pages
       - name: Upload site files
         uses: actions/upload-pages-artifact@v3
         with:
